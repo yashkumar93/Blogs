@@ -1,0 +1,52 @@
+// SEO-Optimised Content Publishing Platform — data model
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ArticleStatus {
+  draft
+  published
+}
+
+model Article {
+  id                  String        @id @default(uuid()) @db.Uuid
+  slug                String        @unique @db.VarChar(220)
+  title               String        @db.VarChar(200)
+  content             String        @db.Text
+  excerpt             String?       @db.VarChar(300)
+  coverImageUrl       String?       @map("cover_image_url")
+  coverImageAlt       String?       @map("cover_image_alt") @db.VarChar(200)
+  metaTitle           String?       @map("meta_title") @db.VarChar(120)
+  metaDescription     String?       @map("meta_description") @db.VarChar(200)
+  status              ArticleStatus @default(draft)
+  readingTimeMinutes  Int           @default(1) @map("reading_time_minutes")
+  publishedAt         DateTime?     @map("published_at") @db.Timestamptz()
+  createdAt           DateTime      @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt           DateTime      @updatedAt @map("updated_at") @db.Timestamptz()
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@map("articles")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@map("users")
+}
+
+model Redirect {
+  fromSlug  String   @id @map("from_slug") @db.VarChar(220)
+  toSlug    String   @map("to_slug") @db.VarChar(220)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@map("redirects")
+}
