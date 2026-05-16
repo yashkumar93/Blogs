@@ -104,7 +104,7 @@ export default async function LoginPage({
             }}
           >
             “We replaced our marketing site with this in an afternoon. The
-            Lighthouse score went up. Our writers haven&apos;t asked me a
+            Lighthouse score went up. Our writers haven't asked me a
             single SEO question since.”
           </blockquote>
           <div
