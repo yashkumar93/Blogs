@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { sql, type Article } from "@/lib/db";
 import { site } from "@/lib/site";
 import { deriveExcerpt } from "@/lib/excerpt";
 
@@ -14,19 +14,12 @@ function escapeXml(text: string): string {
 }
 
 export async function GET() {
-  const articles = await prisma.article.findMany({
-    where: { status: "published" },
-    orderBy: { publishedAt: "desc" },
-    take: 50,
-    select: {
-      slug: true,
-      title: true,
-      content: true,
-      excerpt: true,
-      metaDescription: true,
-      publishedAt: true,
-    },
-  });
+  type RssRow = Pick<Article, "slug" | "title" | "content" | "excerpt" | "metaDescription" | "publishedAt">;
+  const articles = await sql<RssRow[]>`
+    SELECT slug, title, content, excerpt, meta_description, published_at
+    FROM articles WHERE status = 'published'
+    ORDER BY published_at DESC LIMIT 50
+  `;
 
   const items = articles
     .map((a) => {

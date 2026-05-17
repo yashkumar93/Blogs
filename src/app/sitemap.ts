@@ -1,15 +1,15 @@
 import type { MetadataRoute } from "next";
-import { prisma } from "@/lib/db";
+import { sql } from "@/lib/db";
 import { site } from "@/lib/site";
 
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const articles = await prisma.article.findMany({
-    where: { status: "published" },
-    select: { slug: true, updatedAt: true, publishedAt: true },
-    orderBy: { publishedAt: "desc" },
-  });
+  const articles = await sql<{ slug: string; updatedAt: Date; publishedAt: Date | null }[]>`
+    SELECT slug, updated_at, published_at
+    FROM articles WHERE status = 'published'
+    ORDER BY published_at DESC
+  `;
 
   const articleEntries: MetadataRoute.Sitemap = articles.map((a) => ({
     url: new URL(`/articles/${a.slug}`, site.url).toString(),

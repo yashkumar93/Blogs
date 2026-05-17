@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { prisma } from "@/lib/db";
+import { sql, type Article } from "@/lib/db";
 import { buildMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { deriveExcerpt } from "@/lib/excerpt";
@@ -30,27 +30,15 @@ export default async function SearchPage({
   const { q } = await searchParams;
   const query = q?.trim() ?? "";
 
+  type SearchRow = Pick<Article, "id" | "slug" | "title" | "excerpt" | "content" | "publishedAt" | "readingTimeMinutes">;
   const results = query
-    ? await prisma.article.findMany({
-        where: {
-          status: "published",
-          OR: [
-            { title: { contains: query, mode: "insensitive" } },
-            { content: { contains: query, mode: "insensitive" } },
-          ],
-        },
-        orderBy: { publishedAt: "desc" },
-        take: 50,
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          excerpt: true,
-          content: true,
-          publishedAt: true,
-          readingTimeMinutes: true,
-        },
-      })
+    ? await sql<SearchRow[]>`
+        SELECT id, slug, title, excerpt, content, published_at, reading_time_minutes
+        FROM articles
+        WHERE status = 'published'
+          AND (title ILIKE ${"%" + query + "%"} OR content ILIKE ${"%" + query + "%"})
+        ORDER BY published_at DESC LIMIT 50
+      `
     : [];
 
   return (

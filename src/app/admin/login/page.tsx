@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
+import { sql, type User } from "@/lib/db";
 import { verifyPassword } from "@/lib/password";
 import { signSession, setSessionCookie } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { FolioMark, Icon } from "@/components/Icon";
+import { PasswordInput } from "./_PasswordInput";
 
 const LoginSchema = z.object({
   email: z.string().email().max(200),
@@ -24,7 +25,7 @@ async function loginAction(formData: FormData) {
   }
 
   const { email, password, next } = parsed.data;
-  const user = await prisma.user.findUnique({ where: { email } });
+  const [user] = await sql<User[]>`SELECT * FROM users WHERE email = ${email} LIMIT 1`;
   const passwordOk = user ? await verifyPassword(password, user.passwordHash) : false;
 
   if (!user || !passwordOk) {
@@ -181,13 +182,7 @@ export default async function LoginPage({
               <div className="field-row">
                 <label htmlFor="password">Password</label>
               </div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-              />
+              <PasswordInput />
             </div>
 
             {error === "invalid" ? (

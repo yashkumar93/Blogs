@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { prisma } from "@/lib/db";
+import { sql, type Article } from "@/lib/db";
 import { buildMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { deriveExcerpt } from "@/lib/excerpt";
@@ -16,22 +16,22 @@ export const revalidate = 300;
 export const dynamicParams = true;
 
 export async function generateStaticParams(): Promise<Params[]> {
-  const articles = await prisma.article.findMany({
-    where: { status: "published" },
-    select: { slug: true },
-    orderBy: { publishedAt: "desc" },
-    take: 100,
-  });
+  const articles = await sql<{ slug: string }[]>`
+    SELECT slug FROM articles WHERE status = 'published'
+    ORDER BY published_at DESC LIMIT 100
+  `;
   return articles.map((a) => ({ slug: a.slug }));
 }
 
 async function findArticleOrRedirect(slug: string) {
-  const article = await prisma.article.findFirst({
-    where: { slug, status: "published" },
-  });
+  const [article] = await sql<Article[]>`
+    SELECT * FROM articles WHERE slug = ${slug} AND status = 'published' LIMIT 1
+  `;
   if (article) return article;
 
-  const moved = await prisma.redirect.findUnique({ where: { fromSlug: slug } });
+  const [moved] = await sql<{ toSlug: string }[]>`
+    SELECT to_slug FROM redirects WHERE from_slug = ${slug} LIMIT 1
+  `;
   if (moved) redirect(`/articles/${moved.toSlug}`);
 
   return null;
@@ -89,20 +89,12 @@ export default async function ArticlePage({
     article.metaDescription ?? article.excerpt ?? deriveExcerpt(article.content);
   const url = new URL(`/articles/${article.slug}`, site.url).toString();
 
-  const related = await prisma.article.findMany({
-    where: { status: "published", NOT: { id: article.id } },
-    orderBy: { publishedAt: "desc" },
-    take: 3,
-    select: {
-      id: true,
-      slug: true,
-      title: true,
-      coverImageUrl: true,
-      coverImageAlt: true,
-      readingTimeMinutes: true,
-      publishedAt: true,
-    },
-  });
+  type RelatedRow = Pick<Article, "id" | "slug" | "title" | "coverImageUrl" | "coverImageAlt" | "readingTimeMinutes" | "publishedAt">;
+  const related = await sql<RelatedRow[]>`
+    SELECT id, slug, title, cover_image_url, cover_image_alt, reading_time_minutes, published_at
+    FROM articles WHERE status = 'published' AND id != ${article.id}
+    ORDER BY published_at DESC LIMIT 3
+  `;
 
   const blogPostingJsonLd = {
     "@context": "https://schema.org",

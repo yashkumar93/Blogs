@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { sql, type Article } from "@/lib/db";
 import { Icon } from "@/components/Icon";
 
 type SearchParams = {
@@ -17,34 +17,24 @@ export default async function AdminDashboard({
     status === "draft" || status === "published" ? status : undefined;
   const query = q?.trim() ?? "";
 
+  type ArticleRow = Pick<Article, "id" | "title" | "slug" | "status" | "updatedAt" | "publishedAt" | "readingTimeMinutes">;
+  type CountRow = { status: string; count: string };
+
   const [articles, counts] = await Promise.all([
-    prisma.article.findMany({
-      where: {
-        ...(statusFilter ? { status: statusFilter } : {}),
-        ...(query ? { title: { contains: query, mode: "insensitive" } } : {}),
-      },
-      orderBy: { updatedAt: "desc" },
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        status: true,
-        updatedAt: true,
-        publishedAt: true,
-        readingTimeMinutes: true,
-      },
-    }),
-    prisma.article.groupBy({
-      by: ["status"],
-      _count: { _all: true },
-    }),
+    sql<ArticleRow[]>`
+      SELECT id, title, slug, status, updated_at, published_at, reading_time_minutes
+      FROM articles
+      WHERE TRUE
+        ${statusFilter ? sql`AND status = ${statusFilter}` : sql``}
+        ${query ? sql`AND title ILIKE ${"%" + query + "%"}` : sql``}
+      ORDER BY updated_at DESC
+    `,
+    sql<CountRow[]>`SELECT status, COUNT(*)::text AS count FROM articles GROUP BY status`,
   ]);
 
-  const allCount = counts.reduce((sum, c) => sum + c._count._all, 0);
-  const publishedCount =
-    counts.find((c) => c.status === "published")?._count._all ?? 0;
-  const draftCount =
-    counts.find((c) => c.status === "draft")?._count._all ?? 0;
+  const allCount = counts.reduce((sum, c) => sum + Number(c.count), 0);
+  const publishedCount = Number(counts.find((c) => c.status === "published")?.count ?? 0);
+  const draftCount = Number(counts.find((c) => c.status === "draft")?.count ?? 0);
 
   const formatDate = (d: Date | null) =>
     d ? d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—";

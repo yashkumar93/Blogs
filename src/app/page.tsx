@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { prisma } from "@/lib/db";
+import { sql, type Article } from "@/lib/db";
 import { buildMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { deriveExcerpt } from "@/lib/excerpt";
@@ -51,26 +51,19 @@ export default async function HomePage({
   const page = parsePage(pageParam);
   const skip = (page - 1) * PAGE_SIZE;
 
-  const [articles, total] = await Promise.all([
-    prisma.article.findMany({
-      where: { status: "published" },
-      orderBy: { publishedAt: "desc" },
-      skip,
-      take: PAGE_SIZE,
-      select: {
-        id: true,
-        slug: true,
-        title: true,
-        excerpt: true,
-        content: true,
-        coverImageUrl: true,
-        coverImageAlt: true,
-        publishedAt: true,
-        readingTimeMinutes: true,
-      },
-    }),
-    prisma.article.count({ where: { status: "published" } }),
+  type ArticleRow = Pick<Article, "id" | "slug" | "title" | "excerpt" | "content" | "coverImageUrl" | "coverImageAlt" | "publishedAt" | "readingTimeMinutes">;
+
+  const [articles, [{ count }]] = await Promise.all([
+    sql<ArticleRow[]>`
+      SELECT id, slug, title, excerpt, content, cover_image_url, cover_image_alt,
+             published_at, reading_time_minutes
+      FROM articles WHERE status = 'published'
+      ORDER BY published_at DESC
+      LIMIT ${PAGE_SIZE} OFFSET ${skip}
+    `,
+    sql<{ count: string }[]>`SELECT COUNT(*)::text AS count FROM articles WHERE status = 'published'`,
   ]);
+  const total = Number(count);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const [hero, ...rest] = articles;

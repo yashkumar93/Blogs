@@ -1,9 +1,10 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { prisma } from "@/lib/db";
+import { sql, type Article } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import { readingTimeMinutes } from "@/lib/reading-time";
@@ -16,10 +17,9 @@ async function ensureUniqueSlug(
   let candidate = slug;
   let n = 1;
   while (true) {
-    const existing = await prisma.article.findUnique({
-      where: { slug: candidate },
-      select: { id: true },
-    });
+    const [existing] = await sql<{ id: string }[]>`
+      SELECT id FROM articles WHERE slug = ${candidate} LIMIT 1
+    `;
     if (!existing || existing.id === excludeId) return candidate;
     n += 1;
     candidate = `${slug}-${n}`;
@@ -99,51 +99,66 @@ async function saveArticle(
   const slugSource = input.slug && input.slug.length > 0 ? input.slug : input.title;
   const slug = await ensureUniqueSlug(slugSource, input.id);
 
-  const data = {
-    title: input.title,
-    slug,
-    content: input.content,
-    excerpt: emptyToNull(input.excerpt),
-    metaTitle: emptyToNull(input.metaTitle),
-    metaDescription: emptyToNull(input.metaDescription),
-    coverImageUrl: emptyToNull(input.coverImageUrl),
-    coverImageAlt: emptyToNull(input.coverImageAlt),
-    readingTimeMinutes: readingTimeMinutes(input.content),
-    status: intent === "publish" ? ("published" as const) : ("draft" as const),
-  };
+  const status = intent === "publish" ? "published" : "draft";
+  const excerpt = emptyToNull(input.excerpt);
+  const metaTitle = emptyToNull(input.metaTitle);
+  const metaDescription = emptyToNull(input.metaDescription);
+  const coverImageUrl = emptyToNull(input.coverImageUrl);
+  const coverImageAlt = emptyToNull(input.coverImageAlt);
+  const readingTime = readingTimeMinutes(input.content);
 
-  let article;
+  let article: Article;
+
   if (input.id) {
-    const existing = await prisma.article.findUnique({
-      where: { id: input.id },
-      select: { status: true, publishedAt: true, slug: true },
-    });
-    if (!existing) {
-      throw new Error("Article not found");
-    }
+    const [existing] = await sql<Pick<Article, "status" | "publishedAt" | "slug">[]>`
+      SELECT status, published_at, slug FROM articles WHERE id = ${input.id} LIMIT 1
+    `;
+    if (!existing) throw new Error("Article not found");
 
     if (existing.slug !== slug) {
-      await prisma.redirect.upsert({
-        where: { fromSlug: existing.slug },
-        update: { toSlug: slug },
-        create: { fromSlug: existing.slug, toSlug: slug },
-      });
+      await sql`
+        INSERT INTO redirects (from_slug, to_slug)
+        VALUES (${existing.slug}, ${slug})
+        ON CONFLICT (from_slug) DO UPDATE SET to_slug = ${slug}
+      `;
     }
 
     const publishedAt =
       intent === "publish" && !existing.publishedAt ? new Date() : existing.publishedAt;
 
-    article = await prisma.article.update({
-      where: { id: input.id },
-      data: { ...data, publishedAt },
-    });
+    const [updated] = await sql<Article[]>`
+      UPDATE articles SET
+        title = ${input.title},
+        slug = ${slug},
+        content = ${input.content},
+        excerpt = ${excerpt},
+        meta_title = ${metaTitle},
+        meta_description = ${metaDescription},
+        cover_image_url = ${coverImageUrl},
+        cover_image_alt = ${coverImageAlt},
+        reading_time_minutes = ${readingTime},
+        status = ${status},
+        published_at = ${publishedAt ?? null},
+        updated_at = NOW()
+      WHERE id = ${input.id}
+      RETURNING *
+    `;
+    article = updated;
   } else {
-    article = await prisma.article.create({
-      data: {
-        ...data,
-        publishedAt: intent === "publish" ? new Date() : null,
-      },
-    });
+    const publishedAt = intent === "publish" ? new Date() : null;
+    const [created] = await sql<Article[]>`
+      INSERT INTO articles (
+        id, title, slug, content, excerpt,
+        meta_title, meta_description, cover_image_url, cover_image_alt,
+        reading_time_minutes, status, published_at, updated_at
+      ) VALUES (
+        ${randomUUID()}, ${input.title}, ${slug}, ${input.content}, ${excerpt},
+        ${metaTitle}, ${metaDescription}, ${coverImageUrl}, ${coverImageAlt},
+        ${readingTime}, ${status}, ${publishedAt}, NOW()
+      )
+      RETURNING *
+    `;
+    article = created;
   }
 
   revalidatePath("/admin");
@@ -158,11 +173,10 @@ export async function deleteArticle(formData: FormData) {
   const id = formData.get("id");
   if (typeof id !== "string") return;
 
-  const existing = await prisma.article.findUnique({
-    where: { id },
-    select: { slug: true },
-  });
-  await prisma.article.delete({ where: { id } });
+  const [existing] = await sql<{ slug: string }[]>`
+    SELECT slug FROM articles WHERE id = ${id} LIMIT 1
+  `;
+  await sql`DELETE FROM articles WHERE id = ${id}`;
 
   revalidatePath("/admin");
   revalidatePath("/");

@@ -1,6 +1,5 @@
 import "dotenv/config";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../src/generated/prisma/client";
+import postgres from "postgres";
 import bcrypt from "bcryptjs";
 
 async function main() {
@@ -14,23 +13,19 @@ async function main() {
   }
 
   const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error("DATABASE_URL is not set");
-  }
+  if (!connectionString) throw new Error("DATABASE_URL is not set");
 
-  const adapter = new PrismaPg({ connectionString });
-  const prisma = new PrismaClient({ adapter });
-
+  const sql = postgres(connectionString);
   const passwordHash = await bcrypt.hash(password, 12);
 
-  await prisma.user.upsert({
-    where: { email },
-    update: { passwordHash },
-    create: { email, passwordHash },
-  });
+  await sql`
+    INSERT INTO users (id, email, password_hash)
+    VALUES (gen_random_uuid(), ${email}, ${passwordHash})
+    ON CONFLICT (email) DO UPDATE SET password_hash = ${passwordHash}
+  `;
 
   console.log(`Admin user ready: ${email}`);
-  await prisma.$disconnect();
+  await sql.end();
 }
 
 main().catch((err) => {

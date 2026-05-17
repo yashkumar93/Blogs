@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { sql, type Article } from "@/lib/db";
 import { ArticleEditor } from "../../_editor";
 import {
   saveDraftAction,
@@ -13,7 +13,7 @@ export default async function EditArticlePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const article = await prisma.article.findUnique({ where: { id } });
+  const [article] = await sql<Article[]>`SELECT * FROM articles WHERE id = ${id} LIMIT 1`;
   if (!article) notFound();
 
   return (
