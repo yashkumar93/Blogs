@@ -1,60 +1,53 @@
-import { jwtVerify, SignJWT, type JWTPayload } from "jose";
+import "server-only";
+import { randomBytes } from "crypto";
 import { cookies } from "next/headers";
+import { sql } from "@/lib/db";
 
-const COOKIE_NAME = "blog_session";
+export const SESSION_COOKIE_NAME = "blog_session";
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30; // 30 days
 
-type SessionPayload = JWTPayload & {
-  sub: string;
+export type SessionPayload = {
+  sessionId: string;
+  userId: string;
   email: string;
 };
-
-function getSecret(): Uint8Array {
-  const secret = process.env.AUTH_SECRET;
-  if (!secret || secret.length < 32) {
-    throw new Error(
-      "AUTH_SECRET must be set to a string of at least 32 characters",
-    );
-  }
-  return new TextEncoder().encode(secret);
-}
 
 export async function signSession(payload: {
   userId: string;
   email: string;
 }): Promise<string> {
-  return new SignJWT({ sub: payload.userId, email: payload.email })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime(`${COOKIE_MAX_AGE_SECONDS}s`)
-    .sign(getSecret());
+  const id = randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + COOKIE_MAX_AGE_SECONDS * 1000);
+  await sql`
+    INSERT INTO sessions (id, user_id, email, expires_at)
+    VALUES (${id}, ${payload.userId}, ${payload.email}, ${expiresAt})
+  `;
+  return id;
 }
 
 export async function verifySession(
   token: string | undefined,
 ): Promise<SessionPayload | null> {
   if (!token) return null;
-  try {
-    const { payload } = await jwtVerify(token, getSecret());
-    if (typeof payload.sub !== "string" || typeof payload.email !== "string") {
-      return null;
-    }
-    return payload as SessionPayload;
-  } catch {
-    return null;
-  }
+  const [row] = await sql<{ userId: string; email: string }[]>`
+    SELECT user_id, email FROM sessions
+    WHERE id = ${token} AND expires_at > NOW()
+    LIMIT 1
+  `;
+  if (!row) return null;
+  return { sessionId: token, userId: row.userId, email: row.email };
 }
 
 export async function getSession(): Promise<SessionPayload | null> {
   const store = await cookies();
-  const token = store.get(COOKIE_NAME)?.value;
+  const token = store.get(SESSION_COOKIE_NAME)?.value;
   return verifySession(token);
 }
 
 export async function setSessionCookie(token: string): Promise<void> {
   const store = await cookies();
   store.set({
-    name: COOKIE_NAME,
+    name: SESSION_COOKIE_NAME,
     value: token,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -66,7 +59,9 @@ export async function setSessionCookie(token: string): Promise<void> {
 
 export async function clearSessionCookie(): Promise<void> {
   const store = await cookies();
-  store.delete(COOKIE_NAME);
+  const token = store.get(SESSION_COOKIE_NAME)?.value;
+  if (token) {
+    await sql`DELETE FROM sessions WHERE id = ${token}`;
+  }
+  store.delete(SESSION_COOKIE_NAME);
 }
-
-export const SESSION_COOKIE_NAME = COOKIE_NAME;

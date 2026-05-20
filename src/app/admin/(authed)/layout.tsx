@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getSession } from "@/lib/auth";
@@ -15,8 +16,8 @@ export default async function AuthedAdminLayout({
   children: React.ReactNode;
 }) {
   const session = await getSession();
-  const userInitial =
-    session?.email?.[0]?.toUpperCase() ?? "A";
+  if (!session) redirect("/admin/login");
+  const userInitial = session.email[0].toUpperCase();
 
   return (
     <div className="admin-shell">

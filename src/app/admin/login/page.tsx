@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { sql, type User } from "@/lib/db";
 import { verifyPassword } from "@/lib/password";
-import { signSession, setSessionCookie } from "@/lib/auth";
+import { signSession, setSessionCookie, getSession } from "@/lib/auth";
 import { site } from "@/lib/site";
 import { FolioMark, Icon } from "@/components/Icon";
 import { PasswordInput } from "./_PasswordInput";
@@ -43,8 +43,12 @@ async function loginAction(formData: FormData) {
 export default async function LoginPage({
   searchParams,
 }: {
+
   searchParams: Promise<{ error?: string; next?: string }>;
 }) {
+  const session = await getSession();
+  if (session) redirect("/admin");
+
   const { error, next } = await searchParams;
 
   return (

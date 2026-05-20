@@ -14,7 +14,7 @@ export async function guardAiRequest(): Promise<GuardResult> {
       response: Response.json({ error: "Unauthorized" }, { status: 401 }),
     };
   }
-  const bucket = takeToken(session.sub);
+  const bucket = takeToken(session.userId);
   if (!bucket.ok) {
     return {
       ok: false,
@@ -24,7 +24,7 @@ export async function guardAiRequest(): Promise<GuardResult> {
       ),
     };
   }
-  return { ok: true, userId: session.sub };
+  return { ok: true, userId: session.userId };
 }
 
 export function truncateWords(text: string, maxWords: number): string {
