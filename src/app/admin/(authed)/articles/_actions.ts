@@ -9,6 +9,13 @@ import { getSession } from "@/lib/auth";
 import { slugify } from "@/lib/slug";
 import { readingTimeMinutes } from "@/lib/reading-time";
 
+export type ActionResult = { error: string } | null;
+
+// Re-throw redirect/notFound/etc. — they carry a `digest` property
+function isNextInternalError(e: unknown): boolean {
+  return e != null && typeof e === "object" && "digest" in e;
+}
+
 async function ensureUniqueSlug(
   base: string,
   excludeId?: string,
@@ -76,12 +83,30 @@ function emptyToNull<T extends string | undefined>(v: T): string | null {
   return trimmed.length === 0 ? null : trimmed;
 }
 
-export async function saveDraftAction(formData: FormData) {
-  return saveArticle("draft", formData);
+export async function saveDraftAction(
+  _prev: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  try {
+    await saveArticle("draft", formData);
+    return null;
+  } catch (e) {
+    if (isNextInternalError(e)) throw e;
+    return { error: e instanceof Error ? e.message : "Failed to save draft" };
+  }
 }
 
-export async function publishAction(formData: FormData) {
-  return saveArticle("publish", formData);
+export async function publishAction(
+  _prev: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  try {
+    await saveArticle("publish", formData);
+    return null;
+  } catch (e) {
+    if (isNextInternalError(e)) throw e;
+    return { error: e instanceof Error ? e.message : "Failed to publish" };
+  }
 }
 
 async function saveArticle(

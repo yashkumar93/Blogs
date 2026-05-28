@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useActionState } from "react";
+import type { ActionResult } from "./_actions";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
@@ -56,8 +57,8 @@ export function ArticleEditor({
   deleteAction,
 }: {
   initial: ArticleInitial;
-  saveDraftAction: (formData: FormData) => Promise<void> | void;
-  publishAction: (formData: FormData) => Promise<void> | void;
+  saveDraftAction: (_: ActionResult, formData: FormData) => Promise<ActionResult>;
+  publishAction: (_: ActionResult, formData: FormData) => Promise<ActionResult>;
   deleteAction?: (formData: FormData) => Promise<void> | void;
 }) {
   const [title, setTitle] = useState(initial.title);
@@ -70,6 +71,10 @@ export function ArticleEditor({
   const [coverImageUrl, setCoverImageUrl] = useState(initial.coverImageUrl);
   const [coverImageAlt, setCoverImageAlt] = useState(initial.coverImageAlt);
   const [showPreview, setShowPreview] = useState(false);
+
+  const [draftResult, draftFormAction] = useActionState(saveDraftAction, null);
+  const [publishResult, publishFormAction] = useActionState(publishAction, null);
+  const actionError = draftResult?.error ?? publishResult?.error ?? null;
 
   const [aiMetaPending, setAiMetaPending] = useState(false);
   const [aiMetaError, setAiMetaError] = useState<string | null>(null);
@@ -214,7 +219,7 @@ export function ArticleEditor({
           ) : null}
           <button
             type="submit"
-            formAction={saveDraftAction}
+            formAction={draftFormAction}
             className="btn btn-ghost"
             style={{ padding: "8px 14px", fontSize: 13 }}
           >
@@ -222,7 +227,7 @@ export function ArticleEditor({
           </button>
           <button
             type="submit"
-            formAction={publishAction}
+            formAction={publishFormAction}
             className="btn btn-primary"
             style={{ padding: "8px 16px", fontSize: 13 }}
           >
@@ -231,6 +236,23 @@ export function ArticleEditor({
           </button>
         </div>
       </div>
+
+      {/* Inline error banner */}
+      {actionError ? (
+        <div
+          role="alert"
+          style={{
+            padding: "10px 28px",
+            background: "rgba(220,38,38,0.08)",
+            borderBottom: "1px solid rgba(220,38,38,0.2)",
+            fontFamily: "var(--ui)",
+            fontSize: 13,
+            color: "#dc2626",
+          }}
+        >
+          {actionError}
+        </div>
+      ) : null}
 
       {/* Editor grid */}
       <div
@@ -727,7 +749,26 @@ export function ArticleEditor({
                 paddingTop: 20,
               }}
             >
-              <DeleteForm id={initial.id} action={deleteAction} />
+              <button
+                type="submit"
+                formAction={deleteAction}
+                onClick={(e) => {
+                  if (!confirm("Delete this article? This cannot be undone.")) {
+                    e.preventDefault();
+                  }
+                }}
+                style={{
+                  fontFamily: "var(--ui)",
+                  fontSize: 12,
+                  color: "var(--accent)",
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                }}
+              >
+                Delete article
+              </button>
             </section>
           ) : null}
         </aside>
@@ -736,37 +777,3 @@ export function ArticleEditor({
   );
 }
 
-function DeleteForm({
-  id,
-  action,
-}: {
-  id: string;
-  action: (formData: FormData) => Promise<void> | void;
-}) {
-  return (
-    <form
-      action={action}
-      onSubmit={(e) => {
-        if (!confirm("Delete this article? This cannot be undone.")) {
-          e.preventDefault();
-        }
-      }}
-    >
-      <input type="hidden" name="id" value={id} />
-      <button
-        type="submit"
-        style={{
-          fontFamily: "var(--ui)",
-          fontSize: 12,
-          color: "var(--accent)",
-          background: "none",
-          border: "none",
-          padding: 0,
-          cursor: "pointer",
-        }}
-      >
-        Delete article
-      </button>
-    </form>
-  );
-}

@@ -9,6 +9,7 @@ import { deriveExcerpt } from "@/lib/excerpt";
 import { readingTimeISO } from "@/lib/reading-time";
 import { ArticleBody } from "@/components/ArticleBody";
 import { Icon } from "@/components/Icon";
+import { ScrollProgress } from "@/components/ScrollProgress";
 
 type Params = { slug: string };
 
@@ -126,6 +127,7 @@ export default async function ArticlePage({
 
   return (
     <>
+      <ScrollProgress />
       {/* Mini masthead */}
       <header
         className="flex items-center justify-between"
