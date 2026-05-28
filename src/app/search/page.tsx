@@ -43,7 +43,7 @@ export default async function SearchPage({
       {/* Back nav */}
       <nav className="mb-10 sm:mb-14">
         <Link
-          href="/"
+          href="/blog"
           className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <span>←</span>

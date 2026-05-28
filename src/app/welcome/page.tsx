@@ -51,7 +51,7 @@ export default function WelcomePage() {
           {site.description}
         </p>
         <Link
-          href="/"
+          href="/blog"
           style={{
             fontFamily: "var(--ui)",
             fontSize: 13,
