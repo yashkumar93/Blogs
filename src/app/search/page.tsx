@@ -4,6 +4,7 @@ import { sql, type Article } from "@/lib/db";
 import { buildMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { deriveExcerpt } from "@/lib/excerpt";
+import { ArrowUpRight } from "lucide-react";
 
 export const metadata: Metadata = buildMetadata({
   title: "Search",
@@ -15,11 +16,7 @@ export const metadata: Metadata = buildMetadata({
 type SearchParams = { q?: string };
 
 function formatDate(d: Date): string {
-  return d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 export default async function SearchPage({
@@ -42,179 +39,78 @@ export default async function SearchPage({
     : [];
 
   return (
-    <>
-      <header
-        className="flex items-center justify-between"
-        style={{
-          padding: "20px 32px",
-          borderBottom: "1px solid var(--rule)",
-        }}
-      >
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16 w-full">
+      {/* Back nav */}
+      <nav className="mb-10 sm:mb-14">
         <Link
           href="/"
-          style={{
-            fontFamily: "var(--display)",
-            fontSize: 22,
-            letterSpacing: "-0.02em",
-          }}
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          {site.name}
+          <span>←</span>
+          <span>{site.name}</span>
         </Link>
-        <Link
-          href="/"
-          style={{
-            fontFamily: "var(--ui)",
-            fontSize: 12,
-            color: "var(--ink-dim)",
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-          }}
-        >
-          ← All articles
-        </Link>
+      </nav>
+
+      <header className="mb-8 sm:mb-10">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-3">Search</h1>
+        <p className="text-sm text-muted-foreground">Find articles by title or content.</p>
       </header>
 
-      <main
-        className="flex-1 mx-auto"
-        style={{ maxWidth: 760, padding: "56px 32px 80px", width: "100%" }}
-      >
-        <div className="kicker" style={{ marginBottom: 12 }}>
-          Search
-        </div>
-        <h1
-          className="display"
-          style={{ fontSize: 44, letterSpacing: "-0.025em", marginBottom: 24 }}
-        >
-          Find a post.
-        </h1>
+      <form method="get" role="search" className="mb-10">
+        <label htmlFor="q" className="sr-only">Search articles</label>
+        <input
+          id="q"
+          name="q"
+          type="search"
+          defaultValue={query}
+          placeholder="Search articles…"
+          autoFocus
+          className="w-full bg-muted border border-border rounded-md px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-border"
+        />
+      </form>
 
-        <form method="get" role="search">
-          <label htmlFor="q" className="sr-only">
-            Search articles
-          </label>
-          <input
-            id="q"
-            name="q"
-            type="search"
-            defaultValue={query}
-            placeholder="Search articles…"
-            autoFocus
-            style={{
-              width: "100%",
-              fontFamily: "var(--ui)",
-              fontSize: 15,
-              padding: "12px 14px",
-              background: "var(--card)",
-              border: "1px solid var(--rule)",
-              borderRadius: 4,
-              color: "var(--ink)",
-              outline: "none",
-            }}
-          />
-        </form>
-
-        <section
-          style={{ marginTop: 40 }}
-          aria-live="polite"
-        >
-          {!query ? (
-            <p
-              style={{
-                fontFamily: "var(--body)",
-                fontStyle: "italic",
-                color: "var(--ink-dim)",
-              }}
-            >
-              Type a query to search.
+      <section aria-live="polite">
+        {!query ? (
+          <p className="text-sm text-muted-foreground italic">Type a query to search.</p>
+        ) : results.length === 0 ? (
+          <p className="text-sm text-muted-foreground italic">No results for "{query}".</p>
+        ) : (
+          <>
+            <p className="text-xs text-muted-foreground uppercase tracking-widest mb-6">
+              {results.length} result{results.length === 1 ? "" : "s"} for "{query}"
             </p>
-          ) : results.length === 0 ? (
-            <p
-              style={{
-                fontFamily: "var(--body)",
-                fontStyle: "italic",
-                color: "var(--ink-dim)",
-              }}
-            >
-              No results for “{query}”.
-            </p>
-          ) : (
-            <>
-              <p
-                style={{
-                  fontFamily: "var(--ui)",
-                  fontSize: 12,
-                  color: "var(--ink-dim)",
-                  letterSpacing: "0.04em",
-                  textTransform: "uppercase",
-                  marginBottom: 24,
-                }}
-              >
-                {results.length} result{results.length === 1 ? "" : "s"} for “
-                {query}”
-              </p>
-              <ul
-                style={{
-                  listStyle: "none",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 28,
-                }}
-              >
-                {results.map((a) => {
-                  const excerpt = a.excerpt ?? deriveExcerpt(a.content);
-                  return (
-                    <li
-                      key={a.id}
-                      style={{
-                        paddingBottom: 28,
-                        borderBottom: "1px solid var(--rule-soft)",
-                      }}
-                    >
-                      <article>
-                        <h2
-                          className="display"
-                          style={{ fontSize: 24, marginBottom: 8 }}
-                        >
-                          <Link href={`/articles/${a.slug}`}>{a.title}</Link>
+            <div>
+              {results.map((a) => {
+                const excerpt = a.excerpt ?? deriveExcerpt(a.content, 140);
+                return (
+                  <article key={a.id} className="group py-4 border-b border-border/70 last:border-b-0">
+                    <Link href={`/articles/${a.slug}`} className="block space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <h2 className="text-sm sm:text-base font-medium text-foreground group-hover:underline">
+                          {a.title}
                         </h2>
-                        <div
-                          className="flex items-center"
-                          style={{
-                            gap: 10,
-                            marginBottom: 8,
-                            fontFamily: "var(--ui)",
-                            fontSize: 11,
-                            color: "var(--ink-dim)",
-                          }}
-                        >
-                          {a.publishedAt ? (
-                            <time dateTime={a.publishedAt.toISOString()}>
-                              {formatDate(a.publishedAt)}
-                            </time>
-                          ) : null}
-                          <span aria-hidden="true">·</span>
-                          <span>{a.readingTimeMinutes} min read</span>
-                        </div>
-                        {excerpt ? (
-                          <p
-                            style={{
-                              fontSize: 15,
-                              color: "var(--ink-2)",
-                              lineHeight: 1.55,
-                            }}
-                          >
-                            {excerpt}
-                          </p>
-                        ) : null}
-                      </article>
-                    </li>
-                  );
-                })}
-              </ul>
-            </>
-          )}
-        </section>
-      </main>
-    </>
+                        <ArrowUpRight className="size-3 text-muted-foreground shrink-0 opacity-0 group-hover:opacity-100 transition-all" />
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        {a.publishedAt && (
+                          <time dateTime={a.publishedAt.toISOString()}>{formatDate(a.publishedAt)}</time>
+                        )}
+                        <span aria-hidden="true">·</span>
+                        <span>{a.readingTimeMinutes} min read</span>
+                      </div>
+                      {excerpt && (
+                        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed pt-0.5">
+                          {excerpt}
+                        </p>
+                      )}
+                    </Link>
+                  </article>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </section>
+    </div>
   );
 }

@@ -8,8 +8,8 @@ import { site } from "@/lib/site";
 import { deriveExcerpt } from "@/lib/excerpt";
 import { readingTimeISO } from "@/lib/reading-time";
 import { ArticleBody } from "@/components/ArticleBody";
-import { Icon } from "@/components/Icon";
 import { ScrollProgress } from "@/components/ScrollProgress";
+import { BlurFade } from "@/components/BlurFade";
 
 type Params = { slug: string };
 
@@ -128,291 +128,115 @@ export default async function ArticlePage({
   return (
     <>
       <ScrollProgress />
-      {/* Mini masthead */}
-      <header
-        className="flex items-center justify-between"
-        style={{
-          padding: "20px 32px",
-          borderBottom: "1px solid var(--rule)",
-        }}
-      >
-        <Link
-          href="/"
-          style={{
-            fontFamily: "var(--display)",
-            fontSize: 22,
-            letterSpacing: "-0.02em",
-          }}
-        >
-          {site.name}
-        </Link>
-        <nav
-          aria-label="Primary"
-          className="flex"
-          style={{
-            gap: 20,
-            fontFamily: "var(--ui)",
-            fontSize: 12,
-            color: "var(--ink-dim)",
-            letterSpacing: "0.04em",
-            textTransform: "uppercase",
-          }}
-        >
-          <Link href="/search">Search</Link>
-          <a href="/rss.xml" aria-label="RSS">
-            <Icon name="rss" size={11} />
-          </a>
-        </nav>
-      </header>
 
-      <article style={{ padding: "64px 0 96px" }}>
-        {/* Article header */}
-        <div
-          className="mx-auto"
-          style={{
-            maxWidth: 880,
-            padding: "0 32px",
-            marginBottom: 48,
-          }}
-        >
-          <div
-            className="flex items-center flex-wrap"
-            style={{
-              gap: 14,
-              marginBottom: 28,
-              fontFamily: "var(--ui)",
-              fontSize: 11.5,
-              color: "var(--ink-dim)",
-            }}
-          >
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12 sm:py-16 w-full">
+        {/* Back nav */}
+        <BlurFade>
+          <nav className="mb-10 sm:mb-14">
             <Link
               href="/"
-              className="flex items-center"
-              style={{ gap: 5 }}
+              className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              ← Back
+              <span>←</span>
+              <span>{site.name}</span>
             </Link>
-            <span className="kicker" style={{ fontSize: 10 }}>
-              Article
-            </span>
-          </div>
-          <h1
-            className="display"
-            style={{
-              fontSize: "clamp(38px, 5.5vw, 56px)",
-              lineHeight: 1.05,
-              letterSpacing: "-0.025em",
-              marginBottom: 24,
-            }}
-          >
-            {article.title}
-          </h1>
-          {article.excerpt || description ? (
-            <p
-              style={{
-                fontFamily: "var(--body)",
-                fontStyle: "italic",
-                fontSize: "clamp(18px, 2vw, 21px)",
-                lineHeight: 1.45,
-                color: "var(--ink-2)",
-                marginBottom: 32,
-              }}
-            >
-              {article.excerpt ?? description}
-            </p>
-          ) : null}
-          <div
-            className="flex items-center flex-wrap"
-            style={{
-              gap: 16,
-              fontFamily: "var(--ui)",
-              fontSize: 12.5,
-              color: "var(--ink-dim)",
-            }}
-          >
-            <span>
-              By{" "}
-              <span style={{ color: "var(--ink-2)" }}>
-                {site.defaultAuthor}
-              </span>
-            </span>
-            {article.publishedAt ? (
-              <span className="chip">
-                <time dateTime={article.publishedAt.toISOString()}>
-                  {formatLongDate(article.publishedAt)}
-                </time>
-              </span>
-            ) : null}
-            <span className="chip">
-              <Icon name="clock" size={11} /> {article.readingTimeMinutes} min read
-            </span>
-          </div>
-        </div>
+          </nav>
+        </BlurFade>
 
-        {/* Cover */}
-        {article.coverImageUrl ? (
-          <div
-            className="mx-auto"
-            style={{ maxWidth: 1080, padding: "0 32px" }}
-          >
-            <div
-              style={{
-                position: "relative",
-                width: "100%",
-                aspectRatio: "16/9",
-                borderRadius: 4,
-                overflow: "hidden",
-                background: "var(--paper-2)",
-              }}
-            >
-              <Image
-                src={article.coverImageUrl}
-                alt={article.coverImageAlt ?? ""}
-                fill
-                priority
-                sizes="(max-width: 1080px) 100vw, 1016px"
-                style={{ objectFit: "cover" }}
-              />
-            </div>
-          </div>
-        ) : null}
+        <article>
+          {/* Article header */}
+          <BlurFade delay={0.05}>
+            <header className="mb-8 sm:mb-10">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-4 leading-tight">
+                {article.title}
+              </h1>
+              {(article.excerpt || description) && (
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-5">
+                  {article.excerpt ?? description}
+                </p>
+              )}
+              <div className="flex items-center gap-2.5 text-xs sm:text-sm text-muted-foreground">
+                {article.publishedAt && (
+                  <time dateTime={article.publishedAt.toISOString()}>
+                    {formatLongDate(article.publishedAt)}
+                  </time>
+                )}
+                <span aria-hidden="true">·</span>
+                <span>{article.readingTimeMinutes} min read</span>
+                <span aria-hidden="true">·</span>
+                <span>By {site.defaultAuthor}</span>
+              </div>
+            </header>
+          </BlurFade>
 
-        {/* Body */}
-        <div
-          className="mx-auto"
-          style={{
-            maxWidth: 680,
-            padding: "0 32px",
-            marginTop: 56,
-          }}
-        >
-          <ArticleBody content={article.content} />
+          {/* Cover image */}
+          {article.coverImageUrl && (
+            <BlurFade delay={0.1}>
+              <div className="mb-10 sm:mb-12 rounded-lg overflow-hidden border border-border/50" style={{ aspectRatio: "16/9", position: "relative", width: "100%" }}>
+                <Image
+                  src={article.coverImageUrl}
+                  alt={article.coverImageAlt ?? ""}
+                  fill
+                  priority
+                  sizes="(max-width: 672px) 100vw, 672px"
+                  style={{ objectFit: "cover" }}
+                />
+              </div>
+            </BlurFade>
+          )}
 
-          <hr className="rule" style={{ margin: "3em 0 1.4em" }} />
-          <p
-            style={{
-              fontFamily: "var(--ui)",
-              fontSize: 13,
-              color: "var(--ink-dim)",
-            }}
-          >
-            Published{" "}
-            {article.publishedAt
-              ? formatLongDate(article.publishedAt)
-              : "in draft"}{" "}
-            at {site.url}/articles/{article.slug}.
+          <hr className="border-border mb-8 sm:mb-10" />
+
+          {/* Body */}
+          <BlurFade delay={0.12}>
+            <ArticleBody content={article.content} />
+          </BlurFade>
+
+          <hr className="border-border mt-12 mb-6" />
+          <p className="text-xs text-muted-foreground">
+            Published {article.publishedAt ? formatLongDate(article.publishedAt) : "in draft"} ·{" "}
+            <a href={`/articles/${article.slug}`} className="hover:text-foreground transition-colors">
+              {site.url}/articles/{article.slug}
+            </a>
           </p>
-        </div>
-      </article>
+        </article>
+      </div>
 
       {/* Related */}
-      {related.length > 0 ? (
-        <section
-          style={{
-            borderTop: "1px solid var(--rule)",
-            padding: "64px 32px 96px",
-            background: "var(--paper-2)",
-          }}
-        >
-          <div className="mx-auto" style={{ maxWidth: 1080 }}>
-            <div className="label" style={{ marginBottom: 24 }}>
+      {related.length > 0 && (
+        <section className="border-t border-border/50 py-12 sm:py-16">
+          <div className="max-w-2xl mx-auto px-4 sm:px-6">
+            <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-6">
               Keep reading
-            </div>
-            <div
-              className="grid"
-              style={{
-                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-                gap: 32,
-              }}
-            >
+            </h2>
+            <div>
               {related.map((a) => (
-                <Link
-                  key={a.id}
-                  href={`/articles/${a.slug}`}
-                  className="block"
-                >
-                  {a.coverImageUrl ? (
-                    <div
-                      style={{
-                        position: "relative",
-                        width: "100%",
-                        aspectRatio: "16/10",
-                        background: "var(--paper)",
-                        borderRadius: 4,
-                        overflow: "hidden",
-                        marginBottom: 14,
-                      }}
-                    >
-                      <Image
-                        src={a.coverImageUrl}
-                        alt={a.coverImageAlt ?? ""}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 340px"
-                        style={{ objectFit: "cover" }}
-                      />
-                    </div>
-                  ) : null}
-                  <div style={{ paddingTop: a.coverImageUrl ? 0 : 14 }}>
-                    <span className="kicker" style={{ fontSize: 10 }}>
-                      Article
-                    </span>
-                    <h4
-                      className="display"
-                      style={{
-                        fontSize: 20,
-                        marginTop: 6,
-                        marginBottom: 6,
-                        lineHeight: 1.15,
-                      }}
-                    >
+                <article key={a.id} className="group py-4 border-b border-border/70 last:border-b-0">
+                  <Link href={`/articles/${a.slug}`} className="flex items-center justify-between gap-3">
+                    <h3 className="text-sm sm:text-base font-medium text-foreground group-hover:underline">
                       {a.title}
-                    </h4>
-                    <div
-                      style={{
-                        fontFamily: "var(--ui)",
-                        fontSize: 11.5,
-                        color: "var(--ink-dim)",
-                      }}
-                    >
-                      {a.readingTimeMinutes} min read
-                    </div>
-                  </div>
-                </Link>
+                    </h3>
+                    <span className="text-xs text-muted-foreground shrink-0">{a.readingTimeMinutes} min</span>
+                  </Link>
+                </article>
               ))}
             </div>
           </div>
         </section>
-      ) : null}
+      )}
 
-      <footer
-        className="flex justify-between flex-wrap"
-        style={{
-          padding: "32px",
-          fontFamily: "var(--ui)",
-          fontSize: 12,
-          color: "var(--ink-dim)",
-          background: "var(--paper-2)",
-          borderTop: "1px solid var(--rule)",
-          gap: 12,
-        }}
-      >
-        <div>
-          © {new Date().getFullYear()} {site.name}
-        </div>
-        <div className="flex" style={{ gap: 18 }}>
-          <a href="/rss.xml">/rss.xml</a>
-          <a href="/sitemap.xml">/sitemap.xml</a>
+      <footer className="border-t border-border/50">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between text-xs text-muted-foreground">
+          <span>© {new Date().getFullYear()} {site.name}</span>
+          <div className="flex gap-4">
+            <a href="/rss.xml" className="hover:text-foreground transition-colors">/rss.xml</a>
+            <a href="/sitemap.xml" className="hover:text-foreground transition-colors">/sitemap.xml</a>
+          </div>
         </div>
       </footer>
 
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
     </>
   );
 }

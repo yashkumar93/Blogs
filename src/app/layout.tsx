@@ -7,6 +7,8 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { site } from "@/lib/site";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeToggleButton } from "@/components/ThemeToggleButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,8 +63,16 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${newsreader.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} h-full`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ThemeProvider>
+          <div className="fixed top-4 right-4 z-50">
+            <ThemeToggleButton variant="circle" start="top-right" size={26} />
+          </div>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

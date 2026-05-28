@@ -36,12 +36,12 @@ export function ScrollProgress() {
       <NumberFlow
         value={progressPercent}
         className="absolute top-1 flex h-8 -translate-y-full items-center justify-center px-4 text-xs font-medium tabular-nums opacity-0 transition-opacity group-hover:opacity-100"
-        style={{ color: "var(--ink-dim)" }}
+        style={{ color: "var(--muted-foreground)" }}
         suffix="%"
       />
       <div
         className="flex size-12 items-center justify-center rounded-2xl border backdrop-blur"
-        style={{ background: "var(--paper-2, rgba(255,255,255,0.3))", borderColor: "var(--rule)" }}
+        style={{ background: "color-mix(in srgb, var(--background) 80%, transparent)", borderColor: "var(--border)" }}
       >
         <svg className="size-10" viewBox="0 0 48 48" role="presentation">
           <circle
