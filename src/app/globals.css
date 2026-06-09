@@ -146,35 +146,36 @@ html, body {
   cursor: pointer;
 }
 .btn-primary {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--foreground);
+  color: var(--background);
 }
 .btn-primary:hover {
-  background: var(--ink-2);
+  filter: brightness(0.92);
 }
 .btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 .btn-ghost {
-  color: var(--ink);
-  border: 1px solid var(--rule);
-  background: transparent;
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  background: var(--card-bg);
 }
 .btn-ghost:hover {
-  background: var(--rule-soft);
+  background: var(--muted);
 }
 .btn-accent {
-  background: var(--accent);
-  color: var(--paper);
+  background: var(--accent-bg);
+  color: var(--accent-fg);
+  border: 1px solid var(--accent-bg);
 }
 .btn-accent:hover {
-  filter: brightness(0.93);
+  filter: brightness(0.96);
 }
 .btn-ai {
-  background: var(--ai-soft);
+  background: var(--card-bg);
   color: var(--ai);
-  border: 1px solid var(--ai-soft);
+  border: 1px solid var(--border);
   font-size: 11px;
   padding: 4px 8px;
   border-radius: 3px;
@@ -189,7 +190,7 @@ html, body {
 }
 .btn-ai:hover:not(:disabled) {
   background: var(--ai);
-  color: var(--paper);
+  color: var(--background);
 }
 .btn-ai:disabled {
   opacity: 0.5;
