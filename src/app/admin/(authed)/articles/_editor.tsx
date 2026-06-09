@@ -308,8 +308,8 @@ export function ArticleEditor({
             {titleSuggestions.length > 0 ? (
               <div
                 style={{
-                  background: "var(--ai-soft)",
-                  border: "1px solid rgba(107,70,193,0.2)",
+                  background: "var(--paper-2)",
+                  border: "1px solid var(--rule)",
                   borderRadius: 4,
                   padding: "12px 14px",
                   marginBottom: 24,
@@ -323,7 +323,7 @@ export function ArticleEditor({
                 >
                   <span
                     style={{
-                      color: "var(--ai)",
+                      color: "var(--accent)",
                       fontSize: 10,
                       letterSpacing: "0.08em",
                       textTransform: "uppercase",
@@ -515,8 +515,9 @@ export function ArticleEditor({
         <aside
           style={{
             padding: "32px 24px",
-            background: "var(--paper-2)",
+            background: "var(--card)",
             overflow: "auto",
+            boxShadow: "inset 1px 0 0 var(--rule-soft)",
           }}
         >
           {/* URL */}
@@ -529,7 +530,7 @@ export function ArticleEditor({
                 fontFamily: "var(--mono)",
                 fontSize: 12,
                 color: "var(--ink-dim)",
-                background: "var(--card)",
+                background: "var(--paper-2)",
                 border: "1px solid var(--rule)",
                 borderRadius: 4,
                 padding: "8px 10px",
@@ -551,7 +552,7 @@ export function ArticleEditor({
                 fontFamily: "var(--mono)",
                 fontSize: 12,
                 padding: "7px 10px",
-                background: "var(--card)",
+                background: "var(--paper-2)",
                 border: "1px solid var(--rule)",
                 borderRadius: 3,
                 color: "var(--ink)",
@@ -644,7 +645,7 @@ export function ArticleEditor({
             </div>
             <div
               style={{
-                background: "var(--card)",
+                background: "var(--paper-2)",
                 border: "1px solid var(--rule)",
                 borderRadius: 4,
                 padding: "12px 14px",
@@ -664,7 +665,7 @@ export function ArticleEditor({
                 style={{
                   fontFamily: "var(--display)",
                   fontSize: 16,
-                  color: "#1a0dab",
+                  color: "var(--accent)",
                   lineHeight: 1.25,
                   marginBottom: 4,
                   letterSpacing: "-0.01em",
@@ -675,7 +676,7 @@ export function ArticleEditor({
               <div
                 style={{
                   fontSize: 12,
-                  color: "#4d5156",
+                  color: "var(--ink-2)",
                   lineHeight: 1.45,
                 }}
               >
@@ -776,4 +777,3 @@ export function ArticleEditor({
     </form>
   );
 }
-

@@ -95,11 +95,11 @@ export default async function AdminDashboard({
                   style={{
                     padding: "6px 12px",
                     borderRadius: 3,
-                    background: isActive ? "var(--card)" : "transparent",
-                    color: isActive ? "var(--ink)" : "var(--ink-dim)",
+                    background: isActive ? "var(--accent-soft)" : "transparent",
+                    color: isActive ? "var(--accent)" : "var(--ink-dim)",
                     fontWeight: isActive ? 500 : 400,
                     boxShadow: isActive
-                      ? "0 1px 2px rgba(0,0,0,0.06)"
+                      ? "0 1px 2px rgba(184,96,47,0.08)"
                       : "none",
                   }}
                 >
@@ -114,14 +114,14 @@ export default async function AdminDashboard({
               <input type="hidden" name="status" value={statusFilter} />
             ) : null}
             <div
-              style={{
-                position: "absolute",
-                left: 10,
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "var(--ink-dim)",
-                pointerEvents: "none",
-              }}
+                style={{
+                  position: "absolute",
+                  left: 10,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: "var(--ink-dim)",
+                  pointerEvents: "none",
+                }}
             >
               <Icon name="search" size={13} />
             </div>
@@ -130,17 +130,17 @@ export default async function AdminDashboard({
               name="q"
               defaultValue={query}
               placeholder="Search titles…"
-              style={{
-                paddingLeft: 32,
-                paddingRight: 12,
-                paddingTop: 7,
-                paddingBottom: 7,
-                fontFamily: "var(--ui)",
-                fontSize: 13,
-                background: "var(--card)",
-                border: "1px solid var(--rule)",
-                borderRadius: 4,
-                width: 240,
+                style={{
+                  paddingLeft: 32,
+                  paddingRight: 12,
+                  paddingTop: 7,
+                  paddingBottom: 7,
+                  fontFamily: "var(--ui)",
+                  fontSize: 13,
+                  background: "var(--paper-2)",
+                  border: "1px solid var(--rule)",
+                  borderRadius: 4,
+                  width: 240,
                 color: "var(--ink)",
               }}
             />

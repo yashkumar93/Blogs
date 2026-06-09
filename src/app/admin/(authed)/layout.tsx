@@ -86,8 +86,8 @@ export default async function AuthedAdminLayout({
                 width: 28,
                 height: 28,
                 borderRadius: "50%",
-                background: "var(--accent)",
-                color: "var(--paper)",
+                background: "var(--accent-soft)",
+                color: "var(--accent)",
                 display: "grid",
                 placeItems: "center",
                 fontSize: 12,
@@ -112,7 +112,7 @@ export default async function AuthedAdminLayout({
                 <button
                   type="submit"
                   style={{
-                    color: "var(--ink-dim)",
+                    color: "var(--accent)",
                     fontSize: 11,
                     cursor: "pointer",
                     background: "none",

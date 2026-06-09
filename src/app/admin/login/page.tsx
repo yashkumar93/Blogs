@@ -64,12 +64,13 @@ export default async function LoginPage({
       <div
         className="folio-login-aside"
         style={{
-          background: "var(--ink)",
-          color: "var(--paper)",
+          background: "var(--card)",
+          color: "var(--ink)",
           padding: "56px 48px",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
+          borderRight: "1px solid var(--rule)",
         }}
       >
         <div className="flex items-center" style={{ gap: 10 }}>
@@ -102,7 +103,7 @@ export default async function LoginPage({
               lineHeight: 1.22,
               letterSpacing: "-0.015em",
               fontStyle: "italic",
-              color: "var(--paper)",
+              color: "var(--ink)",
               borderLeft: "2px solid var(--accent)",
               paddingLeft: 20,
               marginBottom: 24,
@@ -113,13 +114,13 @@ export default async function LoginPage({
             single SEO question since.”
           </blockquote>
           <div
-            style={{
-              fontFamily: "var(--ui)",
-              fontSize: 12.5,
-              color: "rgba(245,239,225,0.6)",
-              letterSpacing: "0.01em",
-            }}
-          >
+              style={{
+                fontFamily: "var(--ui)",
+                fontSize: 12.5,
+                color: "var(--ink-dim)",
+                letterSpacing: "0.01em",
+              }}
+            >
             A happy admin · somewhere
           </div>
         </div>
@@ -127,7 +128,7 @@ export default async function LoginPage({
           style={{
             fontFamily: "var(--ui)",
             fontSize: 11,
-            color: "rgba(245,239,225,0.35)",
+            color: "var(--ink-mute)",
             letterSpacing: "0.06em",
             textTransform: "uppercase",
           }}
