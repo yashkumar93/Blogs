@@ -212,12 +212,12 @@ html, body {
   font-family: var(--ui);
   font-size: 12px;
   font-weight: 500;
-  color: var(--ink);
+  color: var(--foreground);
 }
 .field .hint {
   font-family: var(--ui);
   font-size: 11px;
-  color: var(--ink-dim);
+  color: var(--muted-foreground);
 }
 .field input,
 .field textarea,
@@ -225,10 +225,10 @@ html, body {
   font-family: var(--ui);
   font-size: 14px;
   padding: 10px 12px;
-  background: var(--card);
-  border: 1px solid var(--rule);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: 4px;
-  color: var(--ink);
+  color: var(--foreground);
   transition: border-color 0.15s;
   width: 100%;
   resize: vertical;
@@ -237,7 +237,7 @@ html, body {
 .field textarea:focus,
 .field select:focus {
   outline: none;
-  border-color: var(--ink-dim);
+  border-color: var(--foreground);
 }
 .field .display-input {
   font-family: var(--display);
@@ -654,6 +654,109 @@ html, body {
   margin-bottom: 8px;
 }
 
+.admin-login-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.06), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.04), transparent 20%),
+    linear-gradient(180deg, var(--background) 0%, var(--background) 100%);
+}
+.admin-login-card {
+  width: min(1040px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--card-bg);
+  box-shadow: var(--shadow-md);
+}
+.admin-login-brand {
+  padding: 44px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card-bg) 96%, transparent), var(--card-bg));
+}
+.admin-login-brand .eyebrow,
+.admin-login-kicker {
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+.admin-login-brand h1,
+.admin-login-title {
+  font-family: var(--display);
+  font-size: clamp(40px, 5vw, 58px);
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+}
+.admin-login-brand h1 {
+  margin-top: 12px;
+}
+.admin-login-brand p,
+.admin-login-copy {
+  margin-top: 14px;
+  max-width: 36ch;
+  font-family: var(--ui);
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--muted-foreground);
+}
+.admin-login-brand .meta {
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.admin-login-form {
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.admin-login-form-inner {
+  width: 100%;
+  max-width: 420px;
+}
+.admin-login-error {
+  margin-top: 4px;
+  font-family: var(--ui);
+  font-size: 12px;
+  color: var(--foreground);
+}
+.admin-login-footer {
+  margin-top: 16px;
+  font-family: var(--ui);
+  font-size: 12px;
+  color: var(--muted-foreground);
+  line-height: 1.6;
+}
+.admin-login-note {
+  margin-top: 18px;
+  font-family: var(--ui);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.admin-login-password-toggle {
+  color: var(--muted-foreground);
+  transition: color 0.15s;
+}
+.admin-login-password-toggle:hover {
+  color: var(--foreground);
+}
+
 /* Admin table */
 .folio-table {
   width: 100%;
@@ -703,14 +806,18 @@ html, body {
    Responsive — collapse multi-column layouts on small screens
    ============================================================ */
 @media (max-width: 880px) {
-  .folio-login {
-    grid-template-columns: 1fr !important;
+  .admin-login-shell {
+    padding: 16px !important;
   }
-  .folio-login-aside {
+  .admin-login-card {
+    grid-template-columns: 1fr !important;
+    border-radius: 18px;
+  }
+  .admin-login-brand {
     display: none !important;
   }
-  .folio-login-form {
-    padding: 48px 24px !important;
+  .admin-login-form {
+    padding: 34px 22px !important;
   }
   .admin-shell {
     grid-template-columns: 1fr !important;

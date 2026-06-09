@@ -19,6 +19,7 @@ export function PasswordInput() {
         type="button"
         onClick={() => setShow((s) => !s)}
         aria-label={show ? "Hide password" : "Show password"}
+        className="admin-login-password-toggle"
         style={{
           position: "absolute",
           right: 10,
@@ -28,7 +29,6 @@ export function PasswordInput() {
           border: "none",
           padding: 4,
           cursor: "pointer",
-          color: "var(--ink-dim)",
           lineHeight: 1,
         }}
       >

@@ -52,171 +52,98 @@ export default async function LoginPage({
   const { error, next } = await searchParams;
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "grid",
-        gridTemplateColumns: "1fr 1.1fr",
-      }}
-      className="folio-login"
-    >
-      {/* Brand / quote side */}
-      <div
-        className="folio-login-aside"
-        style={{
-          background: "var(--card)",
-          color: "var(--ink)",
-          padding: "56px 48px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          borderRight: "1px solid var(--rule)",
-        }}
-      >
-        <div className="flex items-center" style={{ gap: 10 }}>
-          <FolioMark size={28} inverse />
-          <span
-            style={{
-              fontFamily: "var(--display)",
-              fontSize: 19,
-              letterSpacing: "-0.01em",
-            }}
-          >
-            {site.name}
-          </span>
-        </div>
-        <div>
-          <div
-            className="kicker"
-            style={{
-              color: "var(--accent)",
-              marginBottom: 20,
-              fontSize: 11,
-            }}
-          >
-            From the field
-          </div>
-          <blockquote
-            style={{
-              fontFamily: "var(--display)",
-              fontSize: 28,
-              lineHeight: 1.22,
-              letterSpacing: "-0.015em",
-              fontStyle: "italic",
-              color: "var(--ink)",
-              borderLeft: "2px solid var(--accent)",
-              paddingLeft: 20,
-              marginBottom: 24,
-            }}
-          >
-            “We replaced our marketing site with this in an afternoon. The
-            Lighthouse score went up. Our writers haven't asked me a
-            single SEO question since.”
-          </blockquote>
-          <div
-              style={{
-                fontFamily: "var(--ui)",
-                fontSize: 12.5,
-                color: "var(--ink-dim)",
-                letterSpacing: "0.01em",
-              }}
-            >
-            A happy admin · somewhere
-          </div>
-        </div>
-        <div
-          style={{
-            fontFamily: "var(--ui)",
-            fontSize: 11,
-            color: "var(--ink-mute)",
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-          }}
-        >
-          {site.name} · v1.0
-        </div>
-      </div>
-
-      {/* Form side */}
-      <div
-        className="folio-login-form"
-        style={{
-          padding: "56px 64px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          background: "var(--paper)",
-        }}
-      >
-        <div style={{ maxWidth: 400 }}>
-          <div className="kicker" style={{ marginBottom: 12 }}>
-            Sign in
-          </div>
-          <h1
-            className="display"
-            style={{ fontSize: 42, marginBottom: 8 }}
-          >
-            Welcome back.
-          </h1>
-          <p
-            style={{
-              fontSize: 15,
-              color: "var(--ink-dim)",
-              marginBottom: 32,
-            }}
-          >
-            Sign in to your admin to draft, edit, and publish.
-          </p>
-
-          <form
-            action={loginAction}
-            style={{ display: "flex", flexDirection: "column", gap: 18 }}
-          >
-            <input type="hidden" name="next" value={next ?? ""} />
-            <div className="field">
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-              />
-            </div>
-            <div className="field">
-              <div className="field-row">
-                <label htmlFor="password">Password</label>
-              </div>
-              <PasswordInput />
-            </div>
-
-            {error === "invalid" ? (
-              <p
-                role="alert"
+    <div className="admin-login-shell">
+      <main className="admin-login-card">
+        <section className="admin-login-brand">
+          <div className="flex items-center" style={{ gap: 10 }}>
+            <FolioMark size={28} />
+            <div>
+              <div className="eyebrow">Admin</div>
+              <div
                 style={{
-                  fontFamily: "var(--ui)",
-                  fontSize: 12,
-                  color: "var(--accent)",
+                  fontFamily: "var(--display)",
+                  fontSize: 18,
+                  letterSpacing: "-0.01em",
+                  marginTop: 2,
                 }}
               >
-                Invalid email or password.
-              </p>
-            ) : null}
+                {site.name}
+              </div>
+            </div>
+          </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary"
-              style={{
-                justifyContent: "center",
-                padding: "12px 18px",
-                marginTop: 8,
-              }}
+          <div>
+            <div className="admin-login-kicker">Private workspace</div>
+            <h1>Sign in.</h1>
+            <p>
+              Access the editorial dashboard to draft, edit, and publish in the
+              same quiet visual language as the rest of the site.
+            </p>
+          </div>
+
+          <div className="meta">{site.name} · admin</div>
+        </section>
+
+        <section className="admin-login-form">
+          <div className="admin-login-form-inner">
+            <div className="admin-login-kicker">Welcome back</div>
+            <h2
+              className="display"
+              style={{ fontSize: 40, marginTop: 8, marginBottom: 8 }}
             >
-              Sign in <Icon name="arrowRight" size={14} />
-            </button>
-          </form>
-        </div>
-      </div>
+              Enter the admin.
+            </h2>
+            <p className="admin-login-copy" style={{ marginBottom: 28 }}>
+              Use your admin credentials to continue.
+            </p>
+
+            <form
+              action={loginAction}
+              style={{ display: "flex", flexDirection: "column", gap: 18 }}
+            >
+              <input type="hidden" name="next" value={next ?? ""} />
+              <div className="field">
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                />
+              </div>
+              <div className="field">
+                <div className="field-row">
+                  <label htmlFor="password">Password</label>
+                </div>
+                <PasswordInput />
+              </div>
+
+              {error === "invalid" ? (
+                <p role="alert" className="admin-login-error">
+                  Invalid email or password.
+                </p>
+              ) : null}
+
+              <button
+                type="submit"
+                className="btn btn-primary"
+                style={{
+                  justifyContent: "center",
+                  padding: "12px 18px",
+                  marginTop: 8,
+                }}
+              >
+                Sign in <Icon name="arrowRight" size={14} />
+              </button>
+            </form>
+
+            <p className="admin-login-footer">
+              Protected area. Return to the public site anytime.
+            </p>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }
