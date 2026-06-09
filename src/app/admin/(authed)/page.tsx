@@ -55,196 +55,136 @@ export default async function AdminDashboard({
     return qs ? `/admin?${qs}` : "/admin";
   }
 
+  const stats = [
+    { label: "All articles", value: allCount },
+    { label: "Published", value: publishedCount },
+    { label: "Drafts", value: draftCount },
+  ];
+
   return (
     <>
-      <div className="admin-topbar">
-        <div>
-          <h1>Articles</h1>
-          <div className="meta">
-            {articles.length} of {allCount}
-          </div>
-        </div>
-        <Link href="/admin/articles/new" className="btn btn-primary">
-          <Icon name="plus" size={14} /> New article
-        </Link>
-      </div>
-
       <div className="admin-content">
-        {/* Toolbar */}
-        <div
-          className="flex items-center justify-between flex-wrap"
-          style={{ gap: 16, marginBottom: 20 }}
-        >
-          <div
-            className="flex"
-            style={{
-              gap: 2,
-              background: "var(--paper-2)",
-              padding: 3,
-              borderRadius: 4,
-              fontFamily: "var(--ui)",
-              fontSize: 12.5,
-            }}
-          >
-            {filters.map((f) => {
-              const isActive = activeFilter === f.key;
-              return (
-                <Link
-                  key={f.key}
-                  href={filterHref(f.key)}
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: 3,
-                    background: isActive ? "var(--accent-soft)" : "transparent",
-                    color: isActive ? "var(--accent)" : "var(--ink-dim)",
-                    fontWeight: isActive ? 500 : 400,
-                    boxShadow: isActive
-                      ? "0 1px 2px rgba(184,96,47,0.08)"
-                      : "none",
-                  }}
-                >
-                  {f.label}
-                </Link>
-              );
-            })}
+        <div className="admin-dashboard">
+          <section className="admin-dashboard-hero">
+            <div className="admin-dashboard-hero-grid">
+              <div>
+                <div className="admin-kicker">Writing desk</div>
+                <h1 className="admin-dashboard-title">Articles</h1>
+                <p className="admin-dashboard-copy">
+                  A quieter, editorial workspace for drafts, published pieces,
+                  and quick edits that feels closer to the public site.
+                </p>
+              </div>
+
+              <div>
+                <div className="admin-hero-actions">
+                  <Link href="/admin/articles/new" className="btn btn-primary">
+                    <Icon name="plus" size={14} /> New article
+                  </Link>
+                </div>
+                <div className="admin-stats" aria-label="Article stats">
+                  {stats.map((stat) => (
+                    <div key={stat.label} className="admin-stat">
+                      <div className="admin-stat-value">{stat.value}</div>
+                      <div className="admin-stat-label">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <div className="admin-toolbar">
+            <div className="admin-filter-group" role="tablist" aria-label="Filter articles">
+              {filters.map((f) => {
+                const isActive = activeFilter === f.key;
+                return (
+                  <Link
+                    key={f.key}
+                    href={filterHref(f.key)}
+                    className={`admin-filter-link${isActive ? " active" : ""}`}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {f.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <form method="get" className="admin-search">
+              {statusFilter ? (
+                <input type="hidden" name="status" value={statusFilter} />
+              ) : null}
+              <span className="admin-search-icon">
+                <Icon name="search" size={13} />
+              </span>
+              <input
+                type="search"
+                name="q"
+                defaultValue={query}
+                placeholder="Search titles"
+                className="admin-search-input"
+                aria-label="Search titles"
+              />
+            </form>
           </div>
 
-          <form method="get" style={{ position: "relative" }}>
-            {statusFilter ? (
-              <input type="hidden" name="status" value={statusFilter} />
-            ) : null}
-            <div
-                style={{
-                  position: "absolute",
-                  left: 10,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "var(--ink-dim)",
-                  pointerEvents: "none",
-                }}
-            >
-              <Icon name="search" size={13} />
-            </div>
-            <input
-              type="search"
-              name="q"
-              defaultValue={query}
-              placeholder="Search titles…"
-                style={{
-                  paddingLeft: 32,
-                  paddingRight: 12,
-                  paddingTop: 7,
-                  paddingBottom: 7,
-                  fontFamily: "var(--ui)",
-                  fontSize: 13,
-                  background: "var(--paper-2)",
-                  border: "1px solid var(--rule)",
-                  borderRadius: 4,
-                  width: 240,
-                color: "var(--ink)",
-              }}
-            />
-          </form>
-        </div>
+          <div className="admin-article-list">
+            {articles.length === 0 ? (
+              <div className="admin-empty-state">
+                <div className="title">No articles match your filter.</div>
+                <p>Try a different search or create a fresh draft.</p>
+              </div>
+            ) : (
+              articles.map((a) => (
+                <article key={a.id} className="admin-article-row">
+                  <div>
+                    <Link href={`/admin/articles/${a.id}/edit`} className="admin-article-link">
+                      <div className="admin-article-title">{a.title}</div>
+                    </Link>
+                    <div className="admin-article-meta">
+                      <span>/{a.slug}</span>
+                      <span aria-hidden="true">·</span>
+                      <span>{a.readingTimeMinutes} min read</span>
+                    </div>
+                  </div>
 
-        {/* Table */}
-        <div
-          style={{
-            background: "var(--card)",
-            border: "1px solid var(--rule)",
-            borderRadius: 4,
-            overflow: "hidden",
-          }}
-        >
-          <table className="folio-table">
-            <thead>
-              <tr>
-                <th style={{ width: "54%" }}>Title</th>
-                <th>Status</th>
-                <th>Updated</th>
-                <th style={{ textAlign: "right" }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {articles.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={4}
-                    style={{
-                      textAlign: "center",
-                      padding: 40,
-                      color: "var(--ink-dim)",
-                    }}
-                  >
-                    No articles match your filter.
-                  </td>
-                </tr>
-              ) : (
-                articles.map((a) => (
-                  <tr key={a.id}>
-                    <td>
+                  <div className="admin-article-side">
+                    <span className={`status-pill ${a.status}`}>{a.status}</span>
+                    <div className="admin-article-meta" style={{ marginTop: 0 }}>
+                      <span>
+                        {a.publishedAt
+                          ? formatDate(a.publishedAt)
+                          : `Draft · ${formatDate(a.updatedAt)}`}
+                      </span>
+                    </div>
+                    <div className="admin-article-actions">
                       <Link
                         href={`/admin/articles/${a.id}/edit`}
-                        style={{ display: "block" }}
+                        className="admin-icon-btn"
+                        title="Edit"
+                        aria-label={`Edit ${a.title}`}
                       >
-                        <div className="title-cell">{a.title}</div>
-                        <div className="sub">
-                          /{a.slug} · {a.readingTimeMinutes} min read
-                        </div>
+                        <Icon name="edit" size={14} />
                       </Link>
-                    </td>
-                    <td>
-                      <span className={`status-pill ${a.status}`}>
-                        {a.status}
-                      </span>
-                    </td>
-                    <td style={{ color: "var(--ink-dim)" }}>
-                      {a.publishedAt
-                        ? formatDate(a.publishedAt)
-                        : `Draft · ${formatDate(a.updatedAt)}`}
-                    </td>
-                    <td style={{ textAlign: "right" }}>
-                      <div
-                        style={{
-                          display: "inline-flex",
-                          gap: 4,
-                        }}
-                      >
+                      {a.status === "published" ? (
                         <Link
-                          href={`/admin/articles/${a.id}/edit`}
-                          style={{
-                            padding: 6,
-                            color: "var(--ink-dim)",
-                            borderRadius: 3,
-                            display: "inline-flex",
-                          }}
-                          title="Edit"
+                          href={`/articles/${a.slug}`}
+                          target="_blank"
+                          rel="noopener"
+                          className="admin-icon-btn"
+                          title="View"
+                          aria-label={`View ${a.title}`}
                         >
-                          <Icon name="edit" size={14} />
+                          <Icon name="eye" size={14} />
                         </Link>
-                        {a.status === "published" ? (
-                          <Link
-                            href={`/articles/${a.slug}`}
-                            target="_blank"
-                            rel="noopener"
-                            style={{
-                              padding: 6,
-                              color: "var(--ink-dim)",
-                              borderRadius: 3,
-                              display: "inline-flex",
-                            }}
-                            title="View"
-                          >
-                            <Icon name="eye" size={14} />
-                          </Link>
-                        ) : null}
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                      ) : null}
+                    </div>
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </>

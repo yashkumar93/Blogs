@@ -119,8 +119,8 @@ export function FolioMark({
       style={{
         width: size,
         height: size,
-        background: inverse ? "var(--paper)" : "var(--ink)",
-        color: inverse ? "var(--ink)" : "var(--paper)",
+        background: inverse ? "var(--background)" : "var(--foreground)",
+        color: inverse ? "var(--foreground)" : "var(--background)",
         display: "grid",
         placeItems: "center",
         fontFamily: "var(--display)",

@@ -41,7 +41,7 @@ export default async function AuthedAdminLayout({
               style={{
                 fontFamily: "var(--ui)",
                 fontSize: 10.5,
-                color: "var(--ink-dim)",
+                color: "var(--muted-foreground)",
                 letterSpacing: "0.04em",
               }}
             >
@@ -72,13 +72,13 @@ export default async function AuthedAdminLayout({
         </div>
 
         <div
-          style={{
-            marginTop: "auto",
-            borderTop: "1px solid var(--rule)",
-            paddingTop: 16,
-            fontFamily: "var(--ui)",
-            fontSize: 12,
-          }}
+            style={{
+              marginTop: "auto",
+              borderTop: "1px solid var(--border)",
+              paddingTop: 16,
+              fontFamily: "var(--ui)",
+              fontSize: 12,
+            }}
         >
           <div className="flex items-center" style={{ gap: 10 }}>
             <div
@@ -86,8 +86,8 @@ export default async function AuthedAdminLayout({
                 width: 28,
                 height: 28,
                 borderRadius: "50%",
-                background: "var(--accent-soft)",
-                color: "var(--accent)",
+                background: "var(--foreground)",
+                color: "var(--background)",
                 display: "grid",
                 placeItems: "center",
                 fontSize: 12,
@@ -99,7 +99,7 @@ export default async function AuthedAdminLayout({
             <div style={{ minWidth: 0, flex: 1 }}>
               <div
                 style={{
-                  color: "var(--ink)",
+                  color: "var(--foreground)",
                   fontWeight: 500,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
@@ -112,7 +112,7 @@ export default async function AuthedAdminLayout({
                 <button
                   type="submit"
                   style={{
-                    color: "var(--accent)",
+                    color: "var(--muted-foreground)",
                     fontSize: 11,
                     cursor: "pointer",
                     background: "none",
